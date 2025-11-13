@@ -8,7 +8,7 @@ import {
   ShoppingCart,
   Package,
   Users,
-  BarChart3,
+  BarChart2,
   Settings,
   Tag,
   UserCheck,
@@ -44,7 +44,7 @@ const Sidebar: React.FC = () => {
     { to: '/suppliers', label: 'Suppliers', icon: <UserPlus size={20} /> },
     { to: '/returns', label: 'Returns', icon: <RotateCcw size={20} /> },
     { to: '/expenses', label: 'Expenses', icon: <DollarSign size={20} /> },
-    { to: '/reports', label: 'Reports', icon: <BarChart3 size={20} />, adminOnly: true },
+    { to: '/reports', label: 'Reports', icon: <BarChart2 size={20} />, adminOnly: true },
     { to: '/users', label: 'Users', icon: <UserCheck size={20} />, adminOnly: true },
     { to: '/settings', label: 'Settings', icon: <Settings size={20} /> },
   ];

@@ -13,14 +13,10 @@ const Login: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      const success = await login(username, password);
-      if (success) {
-        navigate('/');
-      } else {
-        setError('Invalid username or password');
-      }
+      await login(username, password);
+      navigate('/');
     } catch (err) {
-      setError('An unexpected error occurred.');
+      setError('Invalid username or password');
     }
   };
 
