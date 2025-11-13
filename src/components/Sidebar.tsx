@@ -4,19 +4,19 @@ import { useAuth } from '../contexts/AuthContext';
 import db from '../db/database';
 import { motion } from 'framer-motion';
 import {
-  Layout,
+  Home,
   ShoppingCart,
   Package,
   Users,
-  BarChart2,
+  BarChart3,
   Settings,
   Tag,
   UserCheck,
   UserPlus,
   DollarSign,
-  RefreshCw,
+  RotateCcw,
   FileText,
-  Square, // Added Square icon for navigation items
+  LogOut,
 } from 'react-feather';
 
 interface Setting {
@@ -36,15 +36,15 @@ const Sidebar: React.FC = () => {
   const hasInstallments = (hasInstallmentsResult?.count ?? 0) > 0;
 
   const navLinks = [
-    { to: '/', label: 'Dashboard', icon: <Layout size={20} /> },
+    { to: '/', label: 'Dashboard', icon: <Home size={20} /> },
     { to: '/pos', label: 'POS', icon: <ShoppingCart size={20} /> },
     { to: '/products', label: 'Products', icon: <Package size={20} /> },
     { to: '/categories', label: 'Categories', icon: <Tag size={20} /> },
     { to: '/customers', label: 'Customers', icon: <Users size={20} /> },
     { to: '/suppliers', label: 'Suppliers', icon: <UserPlus size={20} /> },
-    { to: '/returns', label: 'Returns', icon: <RefreshCw size={20} /> },
+    { to: '/returns', label: 'Returns', icon: <RotateCcw size={20} /> },
     { to: '/expenses', label: 'Expenses', icon: <DollarSign size={20} /> },
-    { to: '/reports', label: 'Reports', icon: <BarChart2 size={20} />, adminOnly: true },
+    { to: '/reports', label: 'Reports', icon: <BarChart3 size={20} />, adminOnly: true },
     { to: '/users', label: 'Users', icon: <UserCheck size={20} />, adminOnly: true },
     { to: '/settings', label: 'Settings', icon: <Settings size={20} /> },
   ];
@@ -55,45 +55,73 @@ const Sidebar: React.FC = () => {
 
   // Removed linkVariants as per design analysis
 
+  const { logout } = useAuth();
+
   return (
     <motion.div 
-      className="w-64 h-[calc(100vh-2rem)] m-4 p-4 bg-white/30 backdrop-blur-lg rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+      className="w-64 h-screen bg-white shadow-lg flex flex-col"
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      transition={{ duration: 0.3 }}
     >
-      {/* Logo Section */}
-      <div className="p-4 mb-6 text-center">
-        <div className="w-16 h-16 mx-auto bg-white/50 rounded-full flex items-center justify-center text-gray-700 font-bold text-lg shadow-inner">
-          LOGO
+      {/* Logo */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">POS</span>
+          </div>
+          <div>
+            <h2 className="font-bold text-gray-900">POS System</h2>
+            <p className="text-xs text-gray-500">Management</p>
+          </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto space-y-2">
+      <nav className="flex-1 p-4 space-y-1">
         {navLinks.map((link: any) => {
-          if (link.adminOnly && user?.role !== 'admin') {
-            return null;
-          }
+          if (link.adminOnly && user?.role !== 'admin') return null;
           return (
             <NavLink
               key={link.to}
               to={link.to}
               end={link.to === '/'}
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ease-in-out ${
+                `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
                   isActive
-                    ? 'bg-white/70 text-gray-800 font-semibold shadow-md'
-                    : 'text-gray-700 hover:bg-white/50'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-700 hover:bg-gray-100'
                 }`
               }
             >
-              <Square size={18} className={({ isActive }) => isActive ? 'fill-gray-800 text-gray-800' : 'text-gray-500'} />
-              <span className="flex-1">{link.label}</span>
+              {link.icon}
+              <span className="font-medium">{link.label}</span>
             </NavLink>
           );
         })}
       </nav>
+
+      {/* User Info & Logout */}
+      <div className="p-4 border-t border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+              <span className="text-gray-600 font-semibold text-sm">{user?.username?.charAt(0).toUpperCase()}</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">{user?.username}</p>
+              <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+            </div>
+          </div>
+          <button
+            onClick={logout}
+            className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+            title="Logout"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 };

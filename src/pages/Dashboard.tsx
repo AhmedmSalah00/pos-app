@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
-import { AlertTriangle, TrendingUp, ShoppingCart, Users, Package, DollarSign, ChevronRight, FileText, Database } from 'react-feather'; // Added ChevronRight
+import { TrendingUp, ShoppingCart, Users, Package, DollarSign, AlertTriangle } from 'react-feather';
 import db from '../db/database';
 
 interface RevenueData {
@@ -13,14 +13,6 @@ interface Product {
   id: number;
   name: string;
   stock: number;
-}
-
-interface KPI {
-  label: string;
-  value: string | number;
-  icon: React.ReactNode;
-  color: string;
-  trend?: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -72,133 +64,132 @@ const Dashboard: React.FC = () => {
     setTotalProducts(totalProductsResult?.count || 0);
   };
 
-  // KPIs adapted for the new design
-  const dashboardKpis = [
-    { label: 'Daily Revenue', value: `$${dailyRevenue.length > 0 ? dailyRevenue[dailyRevenue.length - 1].revenue.toFixed(2) : '0.00'}`, icon: <TrendingUp size={24} className="text-green-500" /> },
-    { label: 'Monthly Revenue', value: `$${monthlyRevenue.length > 0 ? monthlyRevenue[monthlyRevenue.length - 1].revenue.toFixed(2) : '0.00'}`, icon: <ShoppingCart size={24} className="text-blue-500" /> },
-    { label: 'Total Sales', value: `$${totalRevenue.toFixed(2)}`, icon: <DollarSign size={24} className="text-purple-500" /> },
+  const stats = [
+    { label: 'Total Revenue', value: `$${totalRevenue.toFixed(2)}`, icon: DollarSign, color: 'text-green-600', bg: 'bg-green-50' },
+    { label: 'Total Orders', value: totalOrders.toString(), icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Customers', value: totalCustomers.toString(), icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Products', value: totalProducts.toString(), icon: Package, color: 'text-orange-600', bg: 'bg-orange-50' },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
-    <motion.div 
-      className="h-[calc(100vh-10rem)] m-4 p-8 bg-white/30 backdrop-blur-lg rounded-3xl shadow-2xl flex flex-col"
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
-    >
-      {/* Top Section: Dashboard Title and User Info (from Header) */}
-      {/* This section is now handled by the Header component */}
-
-      {/* Main Dashboard Content */}
-      <div className="flex-1 grid grid-cols-12 gap-6">
-        {/* Left Column */}
-        <div className="col-span-8 flex flex-col space-y-6">
-          {/* KPI Cards */}
-          <div className="grid grid-cols-3 gap-6">
-            {dashboardKpis.map((kpi, idx) => (
-              <motion.div
-                key={idx}
-                variants={itemVariants}
-                className="bg-white/50 rounded-2xl p-5 shadow-lg flex flex-col justify-between"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <p className="text-gray-600 text-sm font-medium">{kpi.label}</p>
-                  {kpi.icon}
-                </div>
-                <p className="text-2xl font-bold text-gray-800">{kpi.value}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Sales Chart */}
+    <div className="p-6 space-y-6">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
           <motion.div
-            variants={itemVariants}
-            className="bg-white/50 rounded-2xl p-6 shadow-lg flex-1"
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-white rounded-lg p-6 shadow-sm border border-gray-100"
           >
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">SALES CHART</h2>
-            {dailyRevenue.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={dailyRevenue}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                  <XAxis dataKey="name" stroke="#9ca3af" />
-                  <YAxis stroke="#9ca3af" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(255,255,255,0.8)',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '8px',
-                      color: '#333'
-                    }}
-                    labelStyle={{ color: '#333' }}
-                  />
-                  <Line type="monotone" dataKey="revenue" stroke="#8884d8" strokeWidth={2} dot={{ fill: '#8884d8', r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-gray-500">
-                <p>No sales data available yet</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
               </div>
-            )}
+              <div className={`p-3 rounded-lg ${stat.bg}`}>
+                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+              </div>
+            </div>
           </motion.div>
-        </div>
-
-        {/* Right Column */}
-        <div className="col-span-4 flex flex-col space-y-6">
-          {/* Out of Stock Alert */}
-          {outOfStockProducts.length > 0 && (
-            <motion.div
-              variants={itemVariants}
-              className="bg-white/50 rounded-2xl p-6 shadow-lg flex flex-col items-center justify-center text-center relative"
-            >
-              <div className="absolute top-0 right-0 -mt-4 -mr-4 bg-red-500 text-white rounded-full p-2 shadow-xl">
-                <AlertTriangle size={24} />
-              </div>
-              <h3 className="font-bold text-red-700 text-lg mb-2">OUT-OF-STOCK ALERT</h3>
-              <p className="text-gray-600 text-sm">Low stock on {outOfStockProducts.length} items</p>
-              {/* Optionally list items here or link to products page */}
-            </motion.div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="grid grid-cols-1 gap-4">
-            <motion.button
-              variants={itemVariants}
-              className="w-full py-3 bg-white/70 rounded-full text-gray-800 font-semibold shadow-md hover:bg-white transition-colors flex items-center justify-center"
-            >
-              <FileText size={18} className="mr-2" />
-              New Invoice
-            </motion.button>
-            <motion.button
-              variants={itemVariants}
-              className="w-full py-3 bg-white/70 rounded-full text-gray-800 font-semibold shadow-md hover:bg-white transition-colors flex items-center justify-center"
-            >
-              <Package size={18} className="mr-2" />
-              Add Product
-            </motion.button>
-            <motion.button
-              variants={itemVariants}
-              className="w-full py-3 bg-white/70 rounded-full text-gray-800 font-semibold shadow-md hover:bg-white transition-colors flex items-center justify-center"
-            >
-              <Database size={18} className="mr-2" />
-              Backup Data
-            </motion.button>
-          </div>
-        </div>
+        ))}
       </div>
-    </motion.div>
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Daily Revenue Chart */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white rounded-lg p-6 shadow-sm border border-gray-100"
+        >
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Daily Revenue (Last 7 Days)</h3>
+          {dailyRevenue.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={dailyRevenue}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="name" stroke="#6b7280" />
+                <YAxis stroke="#6b7280" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                  }}
+                />
+                <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6', r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              <p>No sales data available</p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Monthly Revenue Chart */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.5 }}
+          className="bg-white rounded-lg p-6 shadow-sm border border-gray-100"
+        >
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Revenue</h3>
+          {monthlyRevenue.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={monthlyRevenue}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="name" stroke="#6b7280" />
+                <YAxis stroke="#6b7280" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                  }}
+                />
+                <Bar dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              <p>No monthly data available</p>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Out of Stock Alert */}
+      {outOfStockProducts.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="bg-red-50 border border-red-200 rounded-lg p-6"
+        >
+          <div className="flex items-center space-x-3">
+            <AlertTriangle className="text-red-600" size={24} />
+            <div>
+              <h3 className="text-lg font-semibold text-red-900">Out of Stock Alert</h3>
+              <p className="text-red-700">{outOfStockProducts.length} products are out of stock</p>
+            </div>
+          </div>
+          <div className="mt-4 space-y-2">
+            {outOfStockProducts.slice(0, 5).map(product => (
+              <div key={product.id} className="flex justify-between items-center text-sm">
+                <span className="text-red-800">{product.name}</span>
+                <span className="text-red-600 font-medium">Stock: {product.stock}</span>
+              </div>
+            ))}
+            {outOfStockProducts.length > 5 && (
+              <p className="text-sm text-red-600">...and {outOfStockProducts.length - 5} more</p>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </div>
   );
 };
 
